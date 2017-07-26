@@ -43,43 +43,43 @@ To get help run the script without any arguments or with the -help switch
 If you fail to provide the correct input for an action additional help will be provided to you.  
   
 # EXAMPLE #1 - PULL CURRENT MARKET DATA  
-$market = .\bittrex-api.ps1 -action getmarketsummaries  
+    $market = .\bittrex-api.ps1 -action getmarketsummaries  
   
 # EXAMPLE #2 - USE MARKET DATA WE JUST PULLED TO SEE WHO HAS MORE BUY ORDERS OUT THAN SELL ORDERS  
-$market | ? {$_.OpenBuyOrders -gt $_.OpenSellOrders}  
+    $market | ? {$_.OpenBuyOrders -gt $_.OpenSellOrders}  
   
 # EXAMPLE #3 - USE MARKET DATA WE JUST PULLED TO FIND THE CURRENT TOP 5 PERFORMING CURRENCIES  
-$market | % {  
-    [decimal]$change_amount = $_.Last - $_.PrevDay  
-    [decimal]$change_percent = "{0:N4}" -f (($change_amount / $_.PrevDay) * 100)  
-    $_ | Add-Member -NotePropertyName ChangedValue -NotePropertyValue $change_amount  
-    $_ | Add-Member -NotePropertyName ChangePercent -NotePropertyValue $change_percent  
-}  
-$market | Sort  @{e={$_.ChangePercent -as [decimal]}} -Descending | Select -First 5  
+    $market | % {  
+        [decimal]$change_amount = $_.Last - $_.PrevDay  
+        [decimal]$change_percent = "{0:N4}" -f (($change_amount / $_.PrevDay) * 100)  
+        $_ | Add-Member -NotePropertyName ChangedValue -NotePropertyValue $change_amount  
+        $_ | Add-Member -NotePropertyName ChangePercent -NotePropertyValue $change_percent  
+    }  
+    $market | Sort  @{e={$_.ChangePercent -as [decimal]}} -Descending | Select -First 5  
   
 # EXAMPLE #4 - GET ACCOUNT BALANCES / BTC VALUE OF HOLDINGS / USD VALUE OF HOLDINGS  
-[decimal]$total_btc_value = 0.0  
-[decimal]$btc_usd_value = 0.0  
-$balances = .\bittrex-api.ps1 -action getbalances  
-$balances | % {  
-    if ($_.Currency -ne 'BTC')  
-    {  
-        $ticker = .\bittrex-api.ps1 -action getticker -market "BTC-$($_.Currency)"  
-        $_ | Add-Member -NotePropertyName LastTradePrice -NotePropertyValue $ticker.Last  
-        $value = "{0:N8}" -f ($_.Balance * $_.LastTradePrice)  
-        $_ | Add-Member -NotePropertyName ValueBTC -NotePropertyValue $value  
-        $total_btc_value += $value  
+    [decimal]$total_btc_value = 0.0  
+    [decimal]$btc_usd_value = 0.0  
+    $balances = .\bittrex-api.ps1 -action getbalances  
+    $balances | % {  
+        if ($_.Currency -ne 'BTC')  
+        {  
+            $ticker = .\bittrex-api.ps1 -action getticker -market "BTC-$($_.Currency)"  
+            $_ | Add-Member -NotePropertyName LastTradePrice -NotePropertyValue $ticker.Last  
+            $value = "{0:N8}" -f ($_.Balance * $_.LastTradePrice)  
+            $_ | Add-Member -NotePropertyName ValueBTC -NotePropertyValue $value  
+            $total_btc_value += $value  
+        }  
+        else  
+        {  
+            $ticker = .\bittrex-api.ps1 -action getticker -market "USDT-BTC"  
+            $_ | Add-Member -NotePropertyName LastTradePrice -NotePropertyValue $ticker.Last  
+            $btc_usd_value = $_.LastTradePrice  
+            $value = ($_.Balance * $_.LastTradePrice)  
+            $_ | Add-Member -NotePropertyName ValueUSD -NotePropertyValue $value  
+            $total_btc_value += $_.Balance  
+        }  
     }  
-    else  
-    {  
-        $ticker = .\bittrex-api.ps1 -action getticker -market "USDT-BTC"  
-        $_ | Add-Member -NotePropertyName LastTradePrice -NotePropertyValue $ticker.Last  
-        $btc_usd_value = $_.LastTradePrice  
-        $value = ($_.Balance * $_.LastTradePrice)  
-        $_ | Add-Member -NotePropertyName ValueUSD -NotePropertyValue $value  
-        $total_btc_value += $_.Balance  
-    }  
-}  
-$total_btc_usd_value = "{0:N2}" -f ($total_btc_value * $btc_usd_value)  
-Write-Host "Portfolio is worth $($total_btc_value) BTC / $($total_btc_usd_value) USD"  
+    $total_btc_usd_value = "{0:N2}" -f ($total_btc_value * $btc_usd_value)  
+    Write-Host "Portfolio is worth $($total_btc_value) BTC / $($total_btc_usd_value) USD"  
   
