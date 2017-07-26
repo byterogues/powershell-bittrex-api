@@ -47,6 +47,8 @@ $bt_apisecret = 'YOUR-API-SECRET-HERE'
 ###################################################################
 $bt_url_base = 'https://bittrex.com/api/v1.1'
 $bt_url = ""
+$SCRIPT_NAME = $MyInvocation.MyCommand.Name
+$EXECUTION_DIR = Split-Path $MyInvocation.MyCommand.Path
 
 ### All Available bittrex API Actions/Calls and their url directory
 [hashtable]$bt_actions = @{
@@ -309,8 +311,8 @@ Function Write-Color
 ### handle the script being run without arguments or in help mode.
 if (-not $action -or $help)
 {
-    Write-Host "`r`nbittrex-api.ps1 version 1.0 (07/25/2017)"
-    Write-Host "Usage: `$var = .\bittrex-api.ps1 -action <action-to-perform> <additional arguments>"
+    Write-Host "`r`nbittrex-api version 1.0 (07/25/2017)"
+    Write-Host "Usage: `$var = .\$($SCRIPT_NAME) -action <action-to-perform> <additional arguments>"
     Write-Host "`r`n Actions:-"
     $bt_action_arguments.Keys | % {
         Write-Color "   Action: ^cg$($_)^cn | $($bt_action_arguments[$_])"
@@ -323,7 +325,7 @@ if (-not $action -or $help)
 if (-not $bt_actions.ContainsKey($action.ToLower()))
 {
     Write-Host "`r`nSyntax Error: $($action) is not a known API call." -ForegroundColor Red
-    Write-Host "for help type ./bittrex-api.ps1 -help`r`n" -ForegroundColor Yellow
+    Write-Host "for help type ./$($SCRIPT_NAME) -help`r`n" -ForegroundColor Yellow
     Write-Host "VALID ACTIONS: "
     $bt_actions.Keys | % { Write-Host "`t$($_)" }
     Write-Host "`r`n"
@@ -343,7 +345,7 @@ switch ($action) {
         if (-not $market)
         {
             Write-Host "`r`nSyntax Error: You must specify the market for action getticker!" -ForegroundColor Red
-            Write-Host "`r`nExample:`r`n`t `$ticker = .\bittrex-api.ps1 -action getticker -market BTC-ETH`r`n"
+            Write-Host "`r`nExample:`r`n`t `$ticker = .\$($SCRIPT_NAME) -action getticker -market BTC-ETH`r`n"
             return
         }
         $bt_url = "$($bt_url)&market=$($market)"
@@ -353,7 +355,7 @@ switch ($action) {
         if (-not $market)
         {
             Write-Host "`r`nSyntax Error: You must specify the market for action getmarketsummary!" -ForegroundColor Red
-            Write-Host "`r`nExample:`r`n`t `$marketsummary = .\bittrex-api.ps1 -action getmarketsummary -market BTC-ETH`r`n"
+            Write-Host "`r`nExample:`r`n`t `$marketsummary = .\$($SCRIPT_NAME) -action getmarketsummary -market BTC-ETH`r`n"
             return
         }
         $bt_url = "$($bt_url)&market=$($market)"
@@ -365,8 +367,8 @@ switch ($action) {
             Write-Host "`r`nSyntax Error: You must specify the market and type for action getorderbook!" -ForegroundColor Red
             Write-Host "valid types are: buy, sell, or both" -ForegroundColor Yellow
             Write-Host "optionally you can specify depth with a value of 1 to 50 - the default value is 20." -ForegroundColor Yellow
-            Write-Host "`r`nExamples:`r`n`t`$orderbook = .\bittrex-api.ps1 -action getorderbook -market BTC-ETH -type `"both`""
-            Write-Host "`t`$orderbook = .\bittrex-api.ps1 -action getorderbook -market BTC-ETH -type `"sell`" -depth 50`r`n"
+            Write-Host "`r`nExamples:`r`n`t`$orderbook = .\$($SCRIPT_NAME) -action getorderbook -market BTC-ETH -type `"both`""
+            Write-Host "`t`$orderbook = .\$($SCRIPT_NAME) -action getorderbook -market BTC-ETH -type `"sell`" -depth 50`r`n"
             return
         }
         if ($depth)
@@ -385,7 +387,7 @@ switch ($action) {
         if (-not $market)
         {
             Write-Host "`r`nSyntax Error: You must specify the market for action getmarkethistory!" -ForegroundColor Red
-            Write-Host "`r`nExample:`r`n`t `$markethistory = .\bittrex-api.ps1 -action getmarkethistory -market BTC-ETH`r`n"
+            Write-Host "`r`nExample:`r`n`t `$markethistory = .\$($SCRIPT_NAME) -action getmarkethistory -market BTC-ETH`r`n"
             return
         }
         $bt_url = "$($bt_url)&market=$($market)"
@@ -395,7 +397,7 @@ switch ($action) {
         if (-not $market -or -not $quantity -or -not $rate)
         {
             Write-Host "`r`nSyntax Error: You must specify the market, quantity, and rate for action buylimit!" -ForegroundColor Red
-            Write-Host "`r`nExample:`r`n`t`$buyorder = .\bittrex-api.ps1 -action buylimit -market BTC-ETH -quantity 1.234 -rate 0.0567"
+            Write-Host "`r`nExample:`r`n`t`$buyorder = .\$($SCRIPT_NAME) -action buylimit -market BTC-ETH -quantity 1.234 -rate 0.0567"
             return
         }
         $bt_url = "$($bt_url)&market=$($market)&quantity=$($quantity)&rate=$($rate)"
@@ -405,7 +407,7 @@ switch ($action) {
         if (-not $market -or -not $quantity -or -not $rate)
         {
             Write-Host "`r`nSyntax Error: You must specify the market, quantity, and rate for action selllimit!" -ForegroundColor Red
-            Write-Host "`r`nExample:`r`n`t`$sellorder = .\bittrex-api.ps1 -action selllimit -market BTC-ETH -quantity 1.234 -rate 0.0567"
+            Write-Host "`r`nExample:`r`n`t`$sellorder = .\$($SCRIPT_NAME) -action selllimit -market BTC-ETH -quantity 1.234 -rate 0.0567"
             return
         }
         $bt_url = "$($bt_url)&market=$($market)&quantity=$($quantity)&rate=$($rate)"
@@ -415,8 +417,8 @@ switch ($action) {
         if (-not $uuid)
         {
             Write-Host "`r`nSyntax Error: You must specify the buylimit or selllimit uuid to cancel a market order!" -ForegroundColor Red
-            Write-Host "`r`nExamples:`r`n`t`$marketcancel = .\bittrex-api.ps1 -action marketcancel -uuid `$MyOrder.UUID`r`n"
-            Write-Host "`t`$marketcancel = .\bittrex-api.ps1 -action marketcancel -uuid `"614c34e4-8d71-11e3-94b5-425861b86ab6`"`r`n"
+            Write-Host "`r`nExamples:`r`n`t`$marketcancel = .\$($SCRIPT_NAME) -action marketcancel -uuid `$MyOrder.UUID`r`n"
+            Write-Host "`t`$marketcancel = .\$($SCRIPT_NAME) -action marketcancel -uuid `"614c34e4-8d71-11e3-94b5-425861b86ab6`"`r`n"
             return
         }
         $bt_url = "$($bt_url)&uuid=$($uuid)"
@@ -433,7 +435,7 @@ switch ($action) {
         if (-not $currency)
         {
             Write-Host "`r`nSyntax Error: You must specify the currency for action getbalance!" -ForegroundColor Red
-            Write-Host "`r`nExample:`r`n`t `$btcbalance = .\bittrex-api.ps1 -action getbalance -currency BTC`r`n"
+            Write-Host "`r`nExample:`r`n`t `$btcbalance = .\$($SCRIPT_NAME) -action getbalance -currency BTC`r`n"
             return
         }
         $bt_url = "$($bt_url)&currency=$($currency)"
@@ -443,7 +445,7 @@ switch ($action) {
         if (-not $currency)
         {
             Write-Host "`r`nSyntax Error: You must specify the currency for action getdepositaddress!" -ForegroundColor Red
-            Write-Host "`r`nExample:`r`n`t `$address = .\bittrex-api.ps1 -action getdepositaddress -currency BTC`r`n"
+            Write-Host "`r`nExample:`r`n`t `$address = .\$($SCRIPT_NAME) -action getdepositaddress -currency BTC`r`n"
             return
         }
         $bt_url = "$($bt_url)&currency=$($currency)"
@@ -454,7 +456,7 @@ switch ($action) {
         {
             Write-Host "`r`nSyntax Error: You must specify the currency, quantity, and address for action withdraw!" -ForegroundColor Red
             Write-Host " paymentid is an optional parameter used for CryptoNotes/BitShareX/Nxt optional field (memo/paymentid)" -ForegroundColor Yellow
-            Write-Host "`r`nExample:`r`n`t`$withdraw = .\bittrex-api.ps1 -action withdraw -currency BTC -quantity 0.2501 -address `"1GwjRuktUcbnu7r7yNMsQAaDpp4Rd2KCE8`""
+            Write-Host "`r`nExample:`r`n`t`$withdraw = .\$($SCRIPT_NAME) -action withdraw -currency BTC -quantity 0.2501 -address `"1GwjRuktUcbnu7r7yNMsQAaDpp4Rd2KCE8`""
             return
         }
         $bt_url = "$($bt_url)&currency=$($currency)&quantity=$($quantity)&address=$($address)"
@@ -465,8 +467,8 @@ switch ($action) {
         if (-not $uuid)
         {
             Write-Host "`r`nSyntax Error: You must specify the order uuid to use action getorder!" -ForegroundColor Red
-            Write-Host "`r`nExamples:`r`n`t`$order = .\bittrex-api.ps1 -action getorder -uuid `$MyOrder.UUID`r`n"
-            Write-Host "`t`$order = .\bittrex-api.ps1 -action getorder -uuid `"614c34e4-8d71-11e3-94b5-425861b86ab6`"`r`n"
+            Write-Host "`r`nExamples:`r`n`t`$order = .\$($SCRIPT_NAME) -action getorder -uuid `$MyOrder.UUID`r`n"
+            Write-Host "`t`$order = .\$($SCRIPT_NAME) -action getorder -uuid `"614c34e4-8d71-11e3-94b5-425861b86ab6`"`r`n"
             return
         }
         $bt_url = "$($bt_url)&uuid=$($uuid)"
