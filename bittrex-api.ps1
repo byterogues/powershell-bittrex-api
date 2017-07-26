@@ -48,6 +48,7 @@ $bt_apisecret = 'YOUR-API-SECRET-HERE'
 $bt_url_base = 'https://bittrex.com/api/v1.1'
 $bt_url = ""
 
+### All Available bittrex API Actions/Calls and their url directory
 [hashtable]$bt_actions = @{
     "getmarkets"="/public/getmarkets";
     "getcurrencies"="/public/getcurrencies";
@@ -70,6 +71,7 @@ $bt_url = ""
     "getdeposithistory"="/account/getdeposithistory";
 }
 
+### Used to provide help on actions
 [hashtable]$bt_action_arguments = @{
     "getmarkets"="no arguments required.";
     "getcurrencies"="no arguments required.";
@@ -336,7 +338,7 @@ $bt_url = "$($bt_url_base)$($bt_actions[$action.ToLower()])?apikey=$($bt_apikey)
 ### provide help if not all parameters are included
 ### build the api query url string
 switch ($action) {
-
+    ####################################################################################################################
     "getticker" {
         if (-not $market)
         {
@@ -346,7 +348,7 @@ switch ($action) {
         }
         $bt_url = "$($bt_url)&market=$($market)"
     }
-
+    ####################################################################################################################
     "getmarketsummary" {
         if (-not $market)
         {
@@ -356,7 +358,7 @@ switch ($action) {
         }
         $bt_url = "$($bt_url)&market=$($market)"
     }
-
+    ####################################################################################################################
     "getorderbook" {
         if (-not $market -or -not $type -or ($type.ToLower() -ne "buy" -and $type.ToLower() -ne "sell" -and $type.ToLower() -ne "both"))
         {
@@ -378,7 +380,7 @@ switch ($action) {
             $bt_url = "$($bt_url)&market=$($market)&type=$($type)"
         }
     }
-
+    ####################################################################################################################
     "getmarkethistory" {
         if (-not $market)
         {
@@ -388,7 +390,7 @@ switch ($action) {
         }
         $bt_url = "$($bt_url)&market=$($market)"
     }
-
+    ####################################################################################################################
     "buylimit" {
         if (-not $market -or -not $quantity -or -not $rate)
         {
@@ -398,7 +400,7 @@ switch ($action) {
         }
         $bt_url = "$($bt_url)&market=$($market)&quantity=$($quantity)&rate=$($rate)"
     }
-
+    ####################################################################################################################
     "selllimit" {
         if (-not $market -or -not $quantity -or -not $rate)
         {
@@ -408,7 +410,7 @@ switch ($action) {
         }
         $bt_url = "$($bt_url)&market=$($market)&quantity=$($quantity)&rate=$($rate)"
     }
-
+    ####################################################################################################################
     "marketcancel" {
         if (-not $uuid)
         {
@@ -419,14 +421,14 @@ switch ($action) {
         }
         $bt_url = "$($bt_url)&uuid=$($uuid)"
     }
-
+    ####################################################################################################################
     "getopenorders" {
         if ($market)
         {
             $bt_url = "$($bt_url)&market=$($market)"
         }
     }
-
+    ####################################################################################################################
     "getbalance" {
         if (-not $currency)
         {
@@ -436,7 +438,7 @@ switch ($action) {
         }
         $bt_url = "$($bt_url)&currency=$($currency)"
     }
-
+    ####################################################################################################################
     "getdepositaddress" {
         if (-not $currency)
         {
@@ -446,7 +448,7 @@ switch ($action) {
         }
         $bt_url = "$($bt_url)&currency=$($currency)"
     }
-
+    ####################################################################################################################
     "withdraw" {
         if (-not $currency -or -not $quantity -or -not $address)
         {
@@ -458,7 +460,7 @@ switch ($action) {
         $bt_url = "$($bt_url)&currency=$($currency)&quantity=$($quantity)&address=$($address)"
         if ($paymentid) { $bt_url = "$($bt_url)&paymentid=$($paymentid)" }
     }
-
+    ####################################################################################################################
     "getorder" {
         if (-not $uuid)
         {
@@ -469,22 +471,25 @@ switch ($action) {
         }
         $bt_url = "$($bt_url)&uuid=$($uuid)"
     }
-
+    ####################################################################################################################
     "getwithdrawalhistory" {
         if ($currency)
         {
             $bt_url = "$($bt_url)&currency=$($currency)"
         }
     }
-
+    ####################################################################################################################
     "getdeposithistory" {
         if ($currency)
         {
             $bt_url = "$($bt_url)&currency=$($currency)"
         }
     }
-
+    ####################################################################################################################
 }
 
+### Make the API Query
 $result = New-btQuery -url $bt_url
+
+### return the result
 return $result
