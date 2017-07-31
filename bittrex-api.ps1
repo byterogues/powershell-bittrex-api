@@ -163,7 +163,7 @@ function New-btQuery()
     if (-not $request.success -eq $True)
     {
         Write-Host "BITTREX ERROR: API Query returned an error." -ForegroundColor Red
-        Write-Host "Error Message: $($request["message"])" -ForegroundColor Red
+        Write-Host "Error Message: $($request.message)" -ForegroundColor Red
         return $null
     }
 
