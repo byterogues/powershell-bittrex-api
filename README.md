@@ -50,8 +50,15 @@ If you fail to provide the correct input for an action additional help will be p
   
 # EXAMPLE #3 - USE MARKET DATA WE JUST PULLED TO FIND THE CURRENT TOP 5 PERFORMING CURRENCIES  
     $market | % {  
-        [decimal]$change_amount = $_.Last - $_.PrevDay  
-        [decimal]$change_percent = "{0:N4}" -f (($change_amount / $_.PrevDay) * 100)  
+        [decimal]$change_amount = $_.Last - $_.PrevDay
+        if ($change_amount -ne 0)
+        {
+          [decimal]$change_percent = "{0:N4}" -f (($change_amount / $_.PrevDay) * 100)
+        }
+        else
+        {
+          $change_percent = 0
+        }
         $_ | Add-Member -NotePropertyName ChangedValue -NotePropertyValue $change_amount  
         $_ | Add-Member -NotePropertyName ChangePercent -NotePropertyValue $change_percent  
     }  
